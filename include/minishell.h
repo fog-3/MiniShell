@@ -6,8 +6,8 @@
 # include <errno.h>
 # include <fcntl.h>
 # include <stdio.h>
-# include <readline/history.h>
 # include <readline/readline.h>
+# include <readline/history.h>
 # include <signal.h>
 # include <stdlib.h>
 # include <string.h>
@@ -51,16 +51,28 @@ int		ft_parse(t_data data, t_cmd *cmd_lst);
 int		ft_expand(t_cmd *cmd_lst, char **env);
 char	*ft_expand_word(char *str, char **env);
 
+// QUOTE REMOVAL
+int	remove_quotes(t_cmd *cmd_lst);
 
 // UTILS
 void		print_array(char **array);
 void		free_array(char **array);
+char		*my_getenv(char *str, char **env);
+void		ft_file_clear(t_list *files_lst);
+char		*ft_strjoin2(char *s1, char *s2);
+
 
 // EXECUTION
-void execution (t_data *data);
+void	ft_execute(t_cmd *cmd_lst, char **env);
 
 // PATH
 char		*get_path_line(char **env);
 char		*get_path(char *command, char **env);
+
+// BUILTINS
+void	main_builtin(t_cmd *cmd_lst, t_data *data);
+
+// FREE FUNCTIONS
+int	free_data(t_data *data, t_cmd *cmd_lst, char mode);
 
 #endif
