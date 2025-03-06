@@ -6,7 +6,7 @@
 /*   By: fernando <fernando@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 16:56:40 by fosuna-g          #+#    #+#             */
-/*   Updated: 2025/03/06 14:44:35 by fernando         ###   ########.fr       */
+/*   Updated: 2025/03/06 14:57:45 by fernando         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,22 +95,23 @@ void	built_exit(t_cmd *cmd_lst, t_data *data)
 	int	num;
 
 	ft_putstr_fd("exit\n", 2);
-	if (cmd_lst->next == NULL)
+	if (cmd_lst->w_lst->next == NULL)
 	{
+		write(1, "No hay siguiente\n", 17);
 		free_data(data, cmd_lst, 1);
 		exit(0);
 	}
 	else
 	{
-		if (!ft_isnum(cmd_lst->next->w_lst->content))
+		if (!ft_isnum((char *)cmd_lst->w_lst->next->content))
 		{
 			ft_putstr_fd("exit: ", 2);
-			ft_putstr_fd(cmd_lst->next->w_lst->content, 2);
+			ft_putstr_fd((char *)cmd_lst->w_lst->next->content, 2);
 			ft_putstr_fd(": number argument required\n", 2);
 			free_data(data, cmd_lst, 1);
 			exit(2);
 		}
-		num = ft_atoi(cmd_lst->next->w_lst->content);
+		num = ft_atoi(cmd_lst->w_lst->next->content);
 		free_data(data, cmd_lst, 1);
 		exit(num);
 	}
