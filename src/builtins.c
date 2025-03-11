@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fernando <fernando@student.42.fr>          +#+  +:+       +#+        */
+/*   By: fosuna-g <fosuna-g@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 16:56:40 by fosuna-g          #+#    #+#             */
-/*   Updated: 2025/03/09 23:14:16 by fernando         ###   ########.fr       */
+/*   Updated: 2025/03/11 19:59:38 by fosuna-g         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,29 +27,7 @@ int	ft_isnum(char *str)
 	return (1);
 }
 
-/* void	ft_cpy_path(char *dst, char *src1, char *src2)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (src1[i])
-	{
-		dst[i] = src1[i];
-		i++;
-	}
-	dst[i++] = '=';
-	j = 0;
-	while (src2[j])
-	{
-		dst[i] = src2[j];
-		i++;
-		j++;
-	}
-	dst[i] = '\0';
-} */
-
-void	change_values_env(char *name, char *str, char **env)
+int	change_values_env(char *name, char *str, char **env)
 {
 	int		strlen;
 	char	*new_env;
@@ -65,34 +43,45 @@ void	change_values_env(char *name, char *str, char **env)
 			ft_memcpy(new_env + strlen + 1, str, ft_strlen(str) + 1);
 			free(*env);
 			*env = new_env;
-			break;
+			return (1);
 		}
 		env++;
 	}
+	return (0);
 }
 
 void	built_cd(t_cmd *cmd_lst, t_data *data)
 {
 	int		err;
-	char	*actual;
-	char	*siguiente;
+	char	*pwd;
+	char	*next;
 	
 	if (cmd_lst->w_lst->next == NULL)
 	{
-		actual = my_getenv("PWD", data->env);
-		siguiente = my_getenv("HOME", data->env);
-		if (!siguiente)
+		pwd = my_getenv("PWD", data->env);
+		if (!pwd)
+		{
+			//export pwd gentev(PWD)
+		}
+		next = my_getenv("HOME", data->env);
+		if (!next)
 		{
 			ft_putstr_fd("cd: HOME not set\n", 2);
-			free(actual);
+			free(pwd);
 			return;
 		}
-		err = chdir(siguiente);
-		change_values_env("PWD", siguiente, data->env);
-		change_values_env("OLDPWD", actual, data->env);
+		err = chdir(next);
+		change_values_env("PWD", next, data->env);
+		if(change_values_env("OLDPWD", pwd, data->env))
+		{
+			//export OLDPWD pwd
+		}
 	}
 	else
+	{
+		
 		err = chdir(cmd_lst->w_lst->next->content);
+	}
 	if (err)
 		ft_putstr_fd("Error en chdir\n", 2);
 }
@@ -102,25 +91,52 @@ void	built_pwd(t_data *data)
 	char	*buffer;
 	
 	buffer = my_getenv("PWD", data->env);
+	if (!buffer)
+	{
+		//export pwd gentev(pwd)
+	}
 	if (buffer != NULL)
         printf("%s\n", buffer);
 }
 
-void	built_echo(t_cmd *cmd_lst, t_data *data)
+void	built_echo(t_cmd cmd_lst)
 {
-	(void)cmd_lst;
-	(void)data;
+	int		flag;
+
+	flag = 0;
+	if (cmd_lst.w_lst->next)
+	{
+		cmd_lst.w_lst = cmd_lst.w_lst->next;
+		if (!ft_strncmp("-n", cmd_lst.w_lst->content, ft_strlen("-n")))
+		{
+			cmd_lst.w_lst = cmd_lst.w_lst->next;
+			flag = 1;
+		}
+		while (cmd_lst.w_lst)
+		{
+			ft_putstr_fd(cmd_lst.w_lst->content, 1);
+			cmd_lst.w_lst = cmd_lst.w_lst->next;
+			if (cmd_lst.w_lst)
+				ft_putchar_fd(' ', 1);
+		}
+	}
+	if (!flag)
+		ft_putstr_fd("\n", 1);
 }
 
 void	built_env(t_cmd *cmd_lst, char **env)
 {
-	(void)env;
 	if (cmd_lst->w_lst->next != NULL)
 	{
 		ft_putstr_fd("env: too much parameters\n", 2);
 		return ;
 	}
-	
+	while(*env)
+	{
+		ft_putstr_fd(*env, 1);
+		write(1, "\n", 1);
+		env++;
+	}
 }
 
 void	built_exit(t_cmd *cmd_lst, t_data *data)
@@ -149,6 +165,18 @@ void	built_exit(t_cmd *cmd_lst, t_data *data)
 	}
 }
 
+void	built_export(t_cmd *cmd_lst, t_data *data)
+{
+	(void)cmd_lst;
+	(void)data;
+}
+
+void	built_unset(t_cmd *cmd_lst, t_data *data)
+{
+	(void)cmd_lst;
+	(void)data;
+}
+
 void	main_builtin(t_cmd *cmd_lst, t_data *data)
 {
 	char	*cmd;
@@ -165,9 +193,13 @@ void	main_builtin(t_cmd *cmd_lst, t_data *data)
 	else if (!ft_strncmp(cmd, "exit", ft_strlen(cmd)))
 		built_exit(cmd_lst, data);
 	else if (!ft_strncmp(cmd, "echo", ft_strlen(cmd)))
-		built_echo(cmd_lst, data);
+		built_echo(*cmd_lst);
 	else if (!ft_strncmp(cmd, "pwd", ft_strlen(cmd)))
 		built_pwd(data);
 	else if (!ft_strncmp(cmd, "env", ft_strlen(cmd)))
 		built_env(cmd_lst, data->env);
+	else if (!ft_strncmp(cmd, "export", ft_strlen(cmd)))
+		built_export(cmd_lst, data);
+	else if (!ft_strncmp(cmd, "unset", ft_strlen(cmd)))
+		built_unset(cmd_lst, data);
 }
