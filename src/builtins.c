@@ -6,7 +6,7 @@
 /*   By: fernando <fernando@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 16:56:40 by fosuna-g          #+#    #+#             */
-/*   Updated: 2025/03/06 14:57:45 by fernando         ###   ########.fr       */
+/*   Updated: 2025/03/09 23:14:16 by fernando         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,31 @@ int	ft_isnum(char *str)
 	return (1);
 }
 
+/* void	ft_cpy_path(char *dst, char *src1, char *src2)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (src1[i])
+	{
+		dst[i] = src1[i];
+		i++;
+	}
+	dst[i++] = '=';
+	j = 0;
+	while (src2[j])
+	{
+		dst[i] = src2[j];
+		i++;
+		j++;
+	}
+	dst[i] = '\0';
+} */
+
 void	change_values_env(char *name, char *str, char **env)
 {
 	int		strlen;
-	char	*aux;
 	char	*new_env;
 
 	strlen = ft_strlen(name);
@@ -38,11 +59,12 @@ void	change_values_env(char *name, char *str, char **env)
 	{
 		if (!ft_strncmp(name, *env, strlen) && (*env)[strlen] == '=')
 		{
-			aux = ft_strjoin2(name, "=");
-			new_env = ft_strjoin2(aux, str);
-			free(aux);
+			new_env = (char *)malloc((strlen + ft_strlen(str) + 2)  * sizeof(char));
+			ft_memcpy(new_env, name, strlen);
+			new_env[strlen] = '=';
+			ft_memcpy(new_env + strlen + 1, str, ft_strlen(str) + 1);
+			free(*env);
 			*env = new_env;
-			//free(aux);
 			break;
 		}
 		env++;
@@ -90,6 +112,17 @@ void	built_echo(t_cmd *cmd_lst, t_data *data)
 	(void)data;
 }
 
+void	built_env(t_cmd *cmd_lst, char **env)
+{
+	(void)env;
+	if (cmd_lst->w_lst->next != NULL)
+	{
+		ft_putstr_fd("env: too much parameters\n", 2);
+		return ;
+	}
+	
+}
+
 void	built_exit(t_cmd *cmd_lst, t_data *data)
 {
 	int	num;
@@ -97,7 +130,6 @@ void	built_exit(t_cmd *cmd_lst, t_data *data)
 	ft_putstr_fd("exit\n", 2);
 	if (cmd_lst->w_lst->next == NULL)
 	{
-		write(1, "No hay siguiente\n", 17);
 		free_data(data, cmd_lst, 1);
 		exit(0);
 	}
@@ -136,4 +168,6 @@ void	main_builtin(t_cmd *cmd_lst, t_data *data)
 		built_echo(cmd_lst, data);
 	else if (!ft_strncmp(cmd, "pwd", ft_strlen(cmd)))
 		built_pwd(data);
+	else if (!ft_strncmp(cmd, "env", ft_strlen(cmd)))
+		built_env(cmd_lst, data->env);
 }
