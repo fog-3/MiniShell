@@ -1,13 +1,13 @@
 # MiniShell
 
 CheckList:
-- echo (only `-n` option) => ft_expand_word problems (I)
-- exit ✅
-- env (without options and arguments) ✅
-- export (without options)
-- unset (without options)
-- cd => improve it
-- pwd => improve it
+- [ ] echo (only `-n` option) => ft_expand_word problems (I)
+- [x] exit
+- [x] env (without options and arguments)
+- [ ] export (without options)
+- [ ] unset (without options)
+- [ ] cd => improve it
+- [ ] pwd => improve it
 
 
 (I)
